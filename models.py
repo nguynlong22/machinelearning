@@ -112,57 +112,33 @@ class DigitClassificationModel(Module):
 
 
 class LanguageIDModel(Module):
-    """
-    A model for language identification at a single-word granularity.
-
-    (See RegressionModel for more information about the APIs of different
-    methods here. We recommend that you implement the RegressionModel before
-    working on this part of the project.)
-    """
 
     def __init__(self):
-        # Our dataset contains words from five different languages, and the
-        # combined alphabets of the five languages contain a total of 47 unique
-        # characters.
-        # You can refer to self.num_chars or len(self.languages) in your code
         self.num_chars = 47
         self.languages = ["English", "Spanish", "Finnish", "Dutch", "Polish"]
         super(LanguageIDModel, self).__init__()
-        "*** YOUR CODE HERE ***"
-        # Initialize your model parameters here
 
+        hidden_size = 128
+
+        # Xử lý ký tự đầu vào:
+        self.input_layer = Linear(self.num_chars, hidden_size)
+
+        # Xử lý trạng thái ẩn trước đó:
+        self.hidden_layer = Linear(hidden_size, hidden_size)
+
+        # Chuyển trạng thái ẩn thành dự đoán
+        self.output_layer = Linear(hidden_size, len(self.languages))
 
 
     def forward(self, xs):
-        """
-        Runs the model for a batch of examples.
+        # Xử lý ký tự đầu
+        h = relu(self.input_layer(xs[0]))
 
-        Although words have different lengths, our data processing guarantees
-        that within a single batch, all words will be of the same length (L).
+        # Xử lý các ký tự tiếp theo
+        for x in xs[1:]:
+            h = relu(self.input_layer(x) + self.hidden_layer(h))
 
-        Here `xs` will be a list of length L. Each element of `xs` will be a
-        tensor with shape (batch_size x self.num_chars), where every row in the
-        array is a one-hot vector encoding of a character. For example, if we
-        have a batch of 8 three-letter words where the last word is "cat", then
-        xs[1] will be a tensor that contains a 1 at position (7, 0). Here the
-        index 7 reflects the fact that "cat" is the last word in the batch, and
-        the index 0 reflects the fact that the letter "a" is the inital (0th)
-        letter of our combined alphabet for this task.
-
-        Your model should use a Recurrent Neural Network to summarize the list
-        `xs` into a single tensor of shape (batch_size x hidden_size), for your
-        choice of hidden_size. It should then calculate a tensor of shape
-        (batch_size x 5) containing scores, where higher scores correspond to
-        greater probability of the word originating from a particular language.
-
-        Inputs:
-            xs: a list with L elements (one per character), where each element
-                is a node with shape (batch_size x self.num_chars)
-        Returns:
-            A node with shape (batch_size x 5) containing predicted scores
-                (also called logits)
-        """
-        "*** YOUR CODE HERE ***"
+        return self.output_layer(h)
 
 
 

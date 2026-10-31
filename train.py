@@ -71,21 +71,46 @@ def train_digitclassifier(model, dataset):
 
 
 def train_languageid(model, dataset):
-    """
-    Trains the model.
-
-    Note that when you iterate through dataloader, each batch will returned as its own vector in the form
-    (batch_size x length of word x self.num_chars). However, in order to run multiple samples at the same time,
-    get_loss() and run() expect each batch to be in the form (length of word x batch_size x self.num_chars), meaning
-    that you need to switch the first two dimensions of every batch. This can be done with the movedim() function 
-    as follows:
-
-    movedim(input_vector, initial_dimension_position, final_dimension_position)
-
-    For more information, look at the pytorch documentation of torch.movedim()
-    """
     model.train()
-    "*** YOUR CODE HERE ***"
+
+    learning_rate = 0.002
+    batch_size = 64
+    epochs = 20
+
+    optimizer = optim.Adam(
+        model.parameters(),
+        lr=learning_rate
+    )
+
+    dataloader = DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=True
+    )
+
+    for epoch in range(epochs):
+        for batch in dataloader:
+            x = batch['x']
+            y = batch['label']
+
+            # Chuyển (batch, length, 47)
+            # thành (length, batch, 47)
+            x = movedim(x, 0, 1)
+
+            optimizer.zero_grad()
+
+            # Dự đoán
+            y_pred = model(x)
+
+            # Tính Loss
+            loss = languageid_loss(y_pred, y)
+
+            # Backpropagation
+            loss.backward()
+
+            # Cập nhật trọng số
+            optimizer.step()
+
 
 
 
