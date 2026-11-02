@@ -23,22 +23,22 @@ def train_perceptron(model, dataset):
     with no_grad():
         # Tạo DataLoader với batch_size=1 để duyệt qua từng điểm dữ liệu
         dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
-        
+
         while True:
             mistakes = False
-            
+
             for batch in dataloader:
                 x = batch['x']
                 y = batch['label']
-                
+
                 # Lấy dự đoán từ mô hình
                 prediction = model.get_prediction(x)
-                
+
                 # Nếu dự đoán sai, tiến hành cập nhật trọng số
                 if prediction != y.item():
                     model.w += y * x
                     mistakes = True
-            
+
             # Nếu chạy hết 1 epoch (toàn bộ data) mà không có lỗi, dừng huấn luyện
             if not mistakes:
                 break
@@ -48,7 +48,7 @@ def train_regression(model, dataset):
     """
     Trains the model.
 
-    In order to create batches, create a DataLoader object and pass in `dataset` as well as your required 
+    In order to create batches, create a DataLoader object and pass in `dataset` as well as your required
     batch size. You can look at PerceptronModel as a guideline for how you should implement the DataLoader
 
     Each sample in the dataloader object will be in the form {'x': features, 'label': label} where label
@@ -99,6 +99,21 @@ def train_digitclassifier(model, dataset):
     """
     model.train()
     """ YOUR CODE HERE """
+    dataloader = DataLoader(dataset, batch_size=100, shuffle=True)
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+    for _ in range(10):
+        model.train()
+        for batch in dataloader:
+            optimizer.zero_grad()
+            loss = digitclassifier_loss(model(batch["x"]), batch["label"])
+            loss.backward()
+            optimizer.step()
+
+        model.eval()
+        with no_grad():
+            if dataset.get_validation_accuracy() >= 0.98:
+                break
 
 
 def train_languageid(model, dataset):
@@ -149,13 +164,13 @@ def Train_DigitConvolution(model, dataset):
     optimizer = optim.Adam(model.parameters(), lr=0.005)
     # Khởi tạo DataLoader. Dùng batch_size nhỏ (ví dụ 16 hoặc 32) do vòng lặp convolve khá chậm
     dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-    
+
     model.train()
     for epoch in range(10): # Huấn luyện khoảng 10 epoch là đủ để qua ngưỡng 80% với bộ dữ liệu thu gọn
         for batch in dataloader:
             x = batch['x']
             y = batch['label']
-            
+
             optimizer.zero_grad()
             y_pred = model(x)
             loss = digitconvolution_Loss(y_pred, y)

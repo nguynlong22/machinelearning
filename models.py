@@ -9,7 +9,7 @@ Your code will not pass if the gradescope autograder detects any changed imports
 """
 # import torch
 from torch.nn import Parameter, Linear
-from torch import tensor, tensordot, ones, matmul, zeros 
+from torch import tensor, tensordot, ones, matmul, zeros
 from torch.nn.functional import relu, softmax
 from torch import movedim
 
@@ -96,7 +96,9 @@ class DigitClassificationModel(Module):
         input_size = 28 * 28
         output_size = 10
         "*** YOUR CODE HERE ***"
-
+        self.layer1 = Linear(input_size, 256)
+        self.layer2 = Linear(256, 128)
+        self.layer3 = Linear(128, output_size)
 
     def forward(self, x):
         """
@@ -113,7 +115,9 @@ class DigitClassificationModel(Module):
                 (also called logits)
         """
         """ YOUR CODE HERE """
-
+        x = relu(self.layer1(x))
+        x = relu(self.layer2(x))
+        return self.layer3(x)
 
 
 class LanguageIDModel(Module):
@@ -150,13 +154,13 @@ class LanguageIDModel(Module):
 def Convolve(input: tensor, weight: tensor):
     input_h, input_w = input.shape
     weight_h, weight_w = weight.shape
-    
+
     # Tính toán kích thước của ma trận đầu ra (do không dùng padding)
     out_h = input_h - weight_h + 1
     out_w = input_w - weight_w + 1
-    
+
     Output_Tensor = zeros((out_h, out_w))
-    
+
     # Trượt bộ lọc (kernel) qua từng vị trí trên ảnh đầu vào
     for y in range(out_h):
         for x in range(out_w):
@@ -172,8 +176,8 @@ class DigitConvolutionalModel(Module):
     def __init__(self):
         super().__init__()
         self.convolution_weights = Parameter(ones((3, 3)))
-        
-        # Ảnh 28x28 qua filter 3x3 sẽ thành 26x26. 
+
+        # Ảnh 28x28 qua filter 3x3 sẽ thành 26x26.
         # Khi flatten ra mảng 1 chiều: 26 * 26 = 676
         self.layer1 = Linear(676, 128)
         self.layer2 = Linear(128, 10) # 10 class tương ứng với các số 0-9
@@ -184,7 +188,7 @@ class DigitConvolutionalModel(Module):
             list(map(lambda sample: Convolve(sample, self.convolution_weights), x))
         )
         x = x.flatten(start_dim=1)
-        
+
         # Đưa qua các lớp tuyến tính với hàm kích hoạt ReLU
         x = relu(self.layer1(x))
         x = self.layer2(x)
