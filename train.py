@@ -57,9 +57,40 @@ def train_regression(model, dataset):
     Inputs:
         model: Pytorch model to use
         dataset: a PyTorch dataset object containing data to be trained on
-        
+
     """
     "*** YOUR CODE HERE ***"
+    model.train()
+    batch_size = 64
+    lr = 1e-2
+    # Dừng sớm khi MSE trên toàn bộ tập dữ liệu đạt ngưỡng mong muốn.
+    target_loss = 0.02
+    max_epochs = 20000
+
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    eval_dataloader = DataLoader(dataset, batch_size=len(dataset), shuffle=False)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+
+    for epoch in range(max_epochs):
+        for batch in dataloader:
+            x = batch['x']
+            y = batch['label']
+
+            # Xóa gradient của batch trước, tính dự đoán và MSE cho batch hiện tại.
+            optimizer.zero_grad()
+            loss = regression_loss(model(x), y)
+            # Lan truyền ngược sai số để tính gradient, sau đó cập nhật trọng số.
+            loss.backward()
+            optimizer.step()
+
+        with no_grad():
+            for batch in eval_dataloader:
+                # Không cần gradient khi đánh giá nên tiết kiệm bộ nhớ và phép tính.
+                epoch_loss = regression_loss(model(batch['x']), batch['label']).item()
+
+        # Nếu đã đạt độ chính xác yêu cầu thì kết thúc sớm.
+        if epoch_loss <= target_loss:
+            break
 
 
 def train_digitclassifier(model, dataset):

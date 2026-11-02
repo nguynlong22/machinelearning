@@ -44,7 +44,6 @@ class PerceptronModel(Module):
             return -1
 
 
-
 class RegressionModel(Module):
     """
     A neural network model for approximating a function that maps from real
@@ -56,7 +55,9 @@ class RegressionModel(Module):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
         super().__init__()
-   
+        self.layer1 = Linear(1, 64)
+        self.layer2 = Linear(64, 64)
+        self.layer3 = Linear(64, 1)
 
     def forward(self, x):
         """
@@ -68,6 +69,10 @@ class RegressionModel(Module):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
+        x = relu(self.layer1(x))
+        x = relu(self.layer2(x))
+        # Không dùng ReLU ở đầu ra để y dự đoán có thể nhận cả giá trị âm và dương.
+        return self.layer3(x)
 
 
 class DigitClassificationModel(Module):

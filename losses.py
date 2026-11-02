@@ -11,6 +11,9 @@ def regression_loss(y_pred, y):
     Returns: a tensor of size 1 containing the loss
     """
     "*** YOUR CODE HERE ***"
+    # MSE là trung bình bình phương sai số giữa giá trị dự đoán và nhãn thật.
+    # Sai số càng nhỏ thì mô hình càng dự đoán chính xác.
+    return mse_loss(y_pred, y)
 
 
 
