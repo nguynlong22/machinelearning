@@ -231,5 +231,15 @@ class Attention(Module):
         """
         B, T, C = input.size()
 
-        """YOUR CODE HERE"""
+        k = self.k_layer(input)
+        q = self.q_layer(input)
+        v = self.v_layer(input)
+
+        scores = matmul(q, movedim(k, 1, 2)) / self.layer_size ** 0.5
+        scores = scores.masked_fill(
+            self.mask[:, :, :T, :T] == 0, float("-inf")
+        )[0]
+        attention = softmax(scores, dim=-1)
+
+        return matmul(attention, v)
 
